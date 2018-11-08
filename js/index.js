@@ -29,7 +29,7 @@ function createScene(canvas) {
 
     // Add  a camera so we can view the scene
     camera = new THREE.PerspectiveCamera( 45, canvas.width / canvas.height, 1, 4000 );
-    camera.position.set(-5, 30, 80);
+    camera.position.set(0, 600, 0);
     scene.add(camera);
 
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -45,25 +45,41 @@ function createScene(canvas) {
     group = new THREE.Object3D;
     root.add(group);
 
-    // Create a texture map
-    var map = new THREE.TextureLoader().load('./images/checker_large.gif');
-    map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    map.repeat.set(8, 8);
-
-    var color = 0xffffff;
-
-    // Put in a ground plane to show off the lighting
-    geometry = new THREE.PlaneGeometry(200, 200, 50, 50);
-    var mesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({color:color, map:map, side:THREE.DoubleSide}));
-
-    mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = -4.02;
-
-    // Add the mesh to our group
-    group.add( mesh );
-    mesh.castShadow = false;
-    mesh.receiveShadow = true;
-
     // Now add the group to our scene
     scene.add( root );
+
+    createBoard();
+}
+
+function createBoard(){
+  var { paths } = mapgen();
+
+  console.log(paths);
+
+  var geometry;
+  var material;
+  var sphere;
+  var diff = 120;
+  var size = 5;
+
+  for (var path in paths) {
+    // console.log(path);
+    for (var coords in paths[path]) {
+      console.log(coords);
+      geometry = new THREE.BoxGeometry( size, size, size );
+      material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+      sphere = new THREE.Mesh( geometry, material );
+      sphere.position.set(paths[path][coords].x-diff, 0, paths[path][coords].y-diff);
+      group.add( sphere );
+      if (paths[path][coords].cx != undefined) {
+        geometry = new THREE.BoxGeometry( size, size, size );
+        material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+        sphere = new THREE.Mesh( geometry, material );
+        sphere.position.set(paths[path][coords].cx-diff, 0, paths[path][coords].cy-diff);
+        group.add( sphere );
+      }
+    }
+  }
+
+
 }
