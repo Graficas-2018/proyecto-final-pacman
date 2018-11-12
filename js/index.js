@@ -60,26 +60,100 @@ function createBoard(){
   var material;
   var sphere;
   var diff = 120;
-  var size = 5;
+  var size = 8;
+  var color;
+  var minX = null, maxX = null, minY = null, maxY = null;
+
+  // map[0][0] = 3;
+  // map[1][0] = 3;
 
   for (var path in paths) {
-    // console.log(path);
+    color = Math.random() * 0xffffff;
     for (var coords in paths[path]) {
-      console.log(coords);
-      geometry = new THREE.BoxGeometry( size, size, size );
-      material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-      sphere = new THREE.Mesh( geometry, material );
-      sphere.position.set(paths[path][coords].x-diff, 0, paths[path][coords].y-diff);
-      group.add( sphere );
+      drawSquare(color, paths[path][coords].x-diff, paths[path][coords].y-diff)
+      if (minX == null || paths[path][coords].x-diff < minX)
+        minX = paths[path][coords].x-diff;
+      if (minY == null || paths[path][coords].y-diff < minY)
+        minY = paths[path][coords].y-diff;
+      if (maxX == null || paths[path][coords].x-diff > maxX)
+        maxX = paths[path][coords].x-diff;
+      if (maxY == null || paths[path][coords].y-diff > maxY)
+        maxY = paths[path][coords].y-diff;
       if (paths[path][coords].cx != undefined) {
-        geometry = new THREE.BoxGeometry( size, size, size );
-        material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-        sphere = new THREE.Mesh( geometry, material );
-        sphere.position.set(paths[path][coords].cx-diff, 0, paths[path][coords].cy-diff);
-        group.add( sphere );
+        drawSquare(color, paths[path][coords].cx-diff, paths[path][coords].cy-diff)
+        if (minX == null || paths[path][coords].cx-diff < minX)
+          minX = paths[path][coords].cx-diff;
+        if (minY == null || paths[path][coords].cy-diff < minY)
+          minY = paths[path][coords].cy-diff;
+        if (maxX == null || paths[path][coords].cx-diff > maxX)
+          maxX = paths[path][coords].cx-diff;
+        if (maxY == null || paths[path][coords].cy-diff > maxY)
+          maxY = paths[path][coords].cy-diff;
       }
     }
   }
 
+  var map = Array(((maxX+(minX * -1))/4)+1).fill(0);
+  for (var i = 0; i < map.length; i++) {
+    map[i] = Array(((maxY+(minY * -1))/4)+1).fill(0);
+  }
 
+
+  var x, y;
+  var row;
+
+  for (var path in paths) {
+    for (var coords in paths[path]) {
+      x = Math.round((paths[path][coords].x-diff + (minX * -1))/4);
+      y = Math.round((paths[path][coords].y-diff + (minY * -1))/4);
+      // console.log(String(paths[path][coords].x-diff) + ', ' + String(paths[path][coords].y-diff));
+      // console.log(String(x)+', '+String(y));
+      row = map[x];
+      row[y] = 1;
+      if (paths[path][coords].cx != undefined) {
+        // map[paths[path][coords].cx-diff][paths[path][coords].cy-diff] = 1;
+      }
+    }
+  }
+
+  var diffX = 128;
+  var diffZ = 96;
+  size = 1;
+  for (var i = 0; i < map.length; i++) {
+    if(i == map.length-1) break;
+    if(i % 2 == 0) continue;
+    for (var j = 0; j < map[i].length; j++) {
+      if(j == map[i].length-1) break;
+      if(j % 2 == 0) continue;
+      if(map[i+1][j+1] == 1)
+        continue;
+
+      var geometry = new THREE.SphereGeometry( size, 10, 10 );
+      var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+      var sphere = new THREE.Mesh( geometry, material );
+      sphere.position.set((i*4)-diffX, 0, (j*4)-diffZ);
+      scene.add( sphere );
+
+
+    }
+  }
+
+  console.log(map);
+
+  console.log("min X: "+minX);
+  console.log("max X: "+maxX);
+  console.log("min Y: "+minY);
+  console.log("max Y: "+maxY);
+
+
+}
+
+function drawSquare(color, x, y){
+  var size = 8;
+
+  var geometry = new THREE.CubeGeometry( size, size, size );
+  var material = new THREE.MeshBasicMaterial( {color: color} );
+  var sphere = new THREE.Mesh( geometry, material );
+  sphere.position.set(x, 0, y);
+  group.add( sphere );
 }
