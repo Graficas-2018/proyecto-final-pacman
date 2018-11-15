@@ -93,7 +93,7 @@ function createBoard(){
     }
   }
 
-  var map = Array(((maxX+(minX * -1))/4)+1).fill(0);
+  map = Array(((maxX+(minX * -1))/4)+1).fill(0);
   for (var i = 0; i < map.length; i++) {
     map[i] = Array(((maxY+(minY * -1))/4)+1).fill(0);
   }
@@ -140,10 +140,10 @@ function createBoard(){
 
   console.log(map);
 
-  console.log("min X: "+minX);
-  console.log("max X: "+maxX);
-  console.log("min Y: "+minY);
-  console.log("max Y: "+maxY);
+  // console.log("min X: "+minX);
+  // console.log("max X: "+maxX);
+  // console.log("min Y: "+minY);
+  // console.log("max Y: "+maxY);
 
 
 }
