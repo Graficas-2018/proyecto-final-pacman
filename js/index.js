@@ -54,7 +54,7 @@ function createScene(canvas) {
 function createBoard(){
   var { paths } = mapgen();
 
-  console.log(paths);
+  // console.log(paths);
 
   var geometry;
   var material;
@@ -94,52 +94,104 @@ function createBoard(){
     }
   }
 
-  map = Array(((maxX+(minX * -1))/delta)+1).fill(0);
+  // console.log(minX);
+  // console.log(maxX);
+  // console.log(minY);
+  // console.log(maxY);
+
+  map = Array(((maxY+(minY * -1))/delta)+1).fill(0);
   for (var i = 0; i < map.length; i++) {
-    map[i] = Array(((maxY+(minY * -1))/delta)+1).fill(0);
+    map[i] = Array(((maxX+(minX * -1))/delta)+1).fill(0);
   }
 
+  var arr = [];
 
-  var x, y;
-  var row;
-  var count = 0;
 
   for (var path in paths) {
     for (var coords in paths[path]) {
-      count++;
-      x = Math.round((paths[path][coords].x-diff + (minX * -1))/delta);
-      y = Math.round((paths[path][coords].y-diff + (minY * -1))/delta);
-      row = map[x];
-      row[y] = 1;
-      // drawSquare(0xffffff, x*delta, y*delta);
+      arr.push({'x': ((paths[path][coords].x)*delta)-diff, 'y': ((paths[path][coords].y)*delta)-diff});
       if (paths[path][coords].cx != undefined) {
-        x = Math.round((paths[path][coords].cx-diff + (minX * -1))/delta);
-        y = Math.round((paths[path][coords].cy-diff + (minY * -1))/delta);
-        row = map[x];
-        row[y] = 1;
-        // drawSquare(0xffffff, x*delta, y*delta);
+        arr.push({'x': ((paths[path][coords].cx)*delta)-diff, 'y': ((paths[path][coords].cy)*delta)-diff});
       }
     }
   }
 
-  console.log(map);
 
+  arr.sort(function(a, b) {
+    return a.y - b.y || a.x - b.x;
+  });
+
+  // console.log(arr);
+
+
+  var x, y;
+  var row;
+
+  for (var path in paths) {
+    for (var coords in paths[path]) {
+      x = Math.round((paths[path][coords].x-diff + (minX * -1))/delta);
+      y = Math.round((paths[path][coords].y-diff + (minY * -1))/delta);
+      row = map[y];
+      row[x] = 1;
+      if (paths[path][coords].cx != undefined) {
+        x = Math.round((paths[path][coords].cx-diff + (minX * -1))/delta);
+        y = Math.round((paths[path][coords].cy-diff + (minY * -1))/delta);
+        row = map[y];
+        row[x] = 1;
+      }
+    }
+  }
+
+
+  var firstSphere = true;
   color = Math.random() * 0xffffff;
+  var endRow = true;
 
-  for (var x in map) {
-    for (var y in map[x]) {
-      if (map[x][y] == 1) {
+  for (var y in map) {
+    firstSphere = true;
+    // color = Math.random() * 0xffffff;
+    for (var x in map[y]) {
+      endRow = true;
+      for (var i = x; i < map[y].length; i++) {
+        if (map[y][i] == 1) {
+          endRow = false;
+          break;
+        }
+      }
+
+      if (
+        // (y != 0 && y != map.length-1) &&
+        // (map[y-1][x] != 1 && map[y+1][x]) &&
+        (
+          (x > 12 && x < 18 && y > 13 && y < 16) ||
+          ( x == 15 && y == 13) || endRow
+        )
+      ) {
+        continue;
+      }
+      if (map[y][x] == 1) {
         drawSquare(color, x*delta-diff, y*delta-diff);
-      } else if(map[x][y] == 0) {
-        // if (x % 2 == 0 || y % 2 == 0) {
-        //   continue;
-        // }
+        firstSphere = false;
+      } else if(map[y][x] == 0) {
+        if (firstSphere || x == map[y].length -1)
+          continue;
         drawSphere(x*delta-diff,y*delta-diff);
       }
     }
   }
 
-  console.log(map);
+  // for (var x in map) {
+  //   if (map[x][y] == 1) {
+  //     drawSquare(color, x*delta-diff, y*delta-diff);
+  //     firstSphere = false;
+  //   } else if(map[x][y] == 0) {
+  //     if (x == 0 || x == map.length-1 || y == 0 || y == map[x].length-1 || firstSphere)
+  //       continue;
+  //     drawSphere(x*delta-diff,y*delta-diff);
+  //   }
+  // }
+
+  // console.log(map);
 
 }
 

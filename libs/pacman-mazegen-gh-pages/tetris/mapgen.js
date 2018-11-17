@@ -120,7 +120,7 @@ var genRandom = function() {
 
         // examine an adjacent empty cell
         if (cell.next[i] && !cell.next[i].filled) {
-            
+
             // only open if the cell to the left of it is filled
             if (cell.next[i].next[LEFT] && !cell.next[i].next[LEFT].filled) {
             }
@@ -151,7 +151,7 @@ var genRandom = function() {
     };
 
     var gen = function() {
-    
+
         var cell;      // cell at the center of growth (open cells are chosen around this cell)
         var newCell;   // most recent cell filled
         var firstCell; // the starting cell of the current group
@@ -335,7 +335,7 @@ var genRandom = function() {
                                 }
                                 c.connect[RIGHT] = c.next[DOWN].connect[RIGHT] = true;
                             }
-                            
+
                         }
                         else if (size == 3 || size == 4) {
 
@@ -415,7 +415,7 @@ var genRandom = function() {
 
             //  _
             // |_
-            // 
+            //
             // or
             //  _
             //  _|
@@ -515,7 +515,7 @@ var genRandom = function() {
             for (y0=y; y0>=0; y0--) {
                 c = cells[x+y0*cols];
                 c2 = c.next[RIGHT]
-                if ((!c.connect[UP] || cellIsCrossCenter(c)) && 
+                if ((!c.connect[UP] || cellIsCrossCenter(c)) &&
                     (!c2.connect[UP] || cellIsCrossCenter(c2))) {
                     break;
                 }
@@ -586,7 +586,7 @@ var genRandom = function() {
         var isHori = function(x,y) {
             var q1 = cells[x+y*cols].connect;
             var q2 = cells[x+1+y*cols].connect;
-            return !q1[UP] && !q1[DOWN] && (x==0 || !q1[LEFT]) && q1[RIGHT] && 
+            return !q1[UP] && !q1[DOWN] && (x==0 || !q1[LEFT]) && q1[RIGHT] &&
                    !q2[UP] && !q2[DOWN] && q2[LEFT] && !q2[RIGHT];
         };
         var isVert = function(x,y) {
@@ -597,7 +597,7 @@ var genRandom = function() {
                 return !q1[LEFT] && !q1[UP] && !q1[DOWN] &&
                        !q2[LEFT] && !q2[UP] && !q2[DOWN];
             }
-            return !q1[LEFT] && !q1[RIGHT] && !q1[UP] && q1[DOWN] && 
+            return !q1[LEFT] && !q1[RIGHT] && !q1[UP] && q1[DOWN] &&
                    !q2[LEFT] && !q2[RIGHT] && q2[UP] && !q2[DOWN];
         };
         var x,y;
@@ -757,7 +757,8 @@ var genRandom = function() {
         }
 
         // choose tunnels from candidates
-        var numTunnelsDesired = Math.random() <= 0.45 ? 2 : 1;
+        var numTunnelsDesired = 1;
+        // var numTunnelsDesired = Math.random() <= 0.45 ? 2 : 1;
         var c;
         var selectSingleDeadEnd = function(c) {
             c.connect[RIGHT] = true;
