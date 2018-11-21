@@ -160,10 +160,12 @@ function createBoard(){
       }
 
       if (
-        // (y != 0 && y != map.length-1) &&
+        (y != 0 && y != map.length) &&
         // (map[y-1][x] != 1 && map[y+1][x]) &&
         (
+          // Do not draw in center
           (x > 12 && x < 18 && y > 13 && y < 16) ||
+          // Do not draw in center and end Row
           ( x == 15 && y == 13) || endRow
         )
       ) {
@@ -173,12 +175,14 @@ function createBoard(){
         drawSquare(color, x*delta-diff, y*delta-diff);
         firstSphere = false;
       } else if(map[y][x] == 0) {
-        if (firstSphere || x == map[y].length -1)
+        if (firstSphere || x > map[y].length - 4)
           continue;
-        drawSphere(x*delta-diff,y*delta-diff);
+        drawSphere((x*delta-diff)+(delta/2),(y*delta-diff)+(delta/2));
       }
     }
   }
+
+  console.log(map);
 
   // for (var x in map) {
   //   if (map[x][y] == 1) {
