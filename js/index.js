@@ -60,7 +60,6 @@ function createBoard(){
   var material;
   var sphere;
   var diff = 120;
-  var size = 8;
   var color;
   var minX = null, maxX = null, minY = null, maxY = null;
 
@@ -126,11 +125,18 @@ function createBoard(){
 
   var x, y;
   var row;
+  var openTunnel = true;
 
   for (var path in paths) {
     for (var coords in paths[path]) {
       x = Math.round((paths[path][coords].x-diff + (minX * -1))/delta);
       y = Math.round((paths[path][coords].y-diff + (minY * -1))/delta);
+      if ((x == 0 || x == map[y].length -1) && openTunnel) {
+        openTunnel = false;
+        continue;
+      } else if (x==0 || x == map[y].length -1) {
+        openTunnel = true;
+      }
       row = map[y];
       row[x] = 1;
       if (paths[path][coords].cx != undefined) {
@@ -142,6 +148,7 @@ function createBoard(){
     }
   }
 
+  var tunnelY = null;
 
   var firstSphere = true;
   color = Math.random() * 0xffffff;
@@ -151,6 +158,11 @@ function createBoard(){
     firstSphere = true;
     // color = Math.random() * 0xffffff;
     for (var x in map[y]) {
+      if(x == 0 && (y > 0 && y < map.length -2) && (map[parseInt(y)-1][x] == 1 && map[parseInt(y)+2][x] == 1)){
+        firstSphere = false;
+        tunnelY = y;
+      }
+
       endRow = true;
       for (var i = x; i < map[y].length; i++) {
         if (map[y][i] == 1) {
@@ -158,6 +170,9 @@ function createBoard(){
           break;
         }
       }
+
+      if(y == tunnelY)
+        endRow = false;
 
       if (
         (y != 0 && y != map.length) &&
@@ -175,7 +190,9 @@ function createBoard(){
         drawSquare(color, x*delta-diff, y*delta-diff);
         firstSphere = false;
       } else if(map[y][x] == 0) {
-        if (firstSphere || x > map[y].length - 4)
+        if (firstSphere || x > map[y].length - 4 || y > map.length - 1)
+          continue;
+        if(map[y][parseInt(x)+1] == 1 || map[parseInt(y)+1][x] == 1 || map[parseInt(y)+1][parseInt(x)+1] == 1 || (map[parseInt(y)+1][parseInt(x)+1] == 1 && map[parseInt(y)-1][parseInt(x)-1] == 1))
           continue;
         drawSphere((x*delta-diff)+(delta/2),(y*delta-diff)+(delta/2));
       }
