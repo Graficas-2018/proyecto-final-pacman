@@ -1,3 +1,5 @@
+var clock = new THREE.Clock();
+
 function run() {
     requestAnimationFrame(function() { run(); });
 
@@ -6,6 +8,8 @@ function run() {
 
         // Spin the cube for next frame
         // animate();
+
+        moveGhosts();
 
         // Update the camera controller
         orbitControls.update();
@@ -49,6 +53,7 @@ function createScene(canvas) {
     scene.add( root );
 
     createBoard();
+    createGhosts();
 }
 
 function createBoard(){
@@ -61,8 +66,6 @@ function createBoard(){
   var sphere;
   var diff = 120;
   var color;
-  var minX = null, maxX = null, minY = null, maxY = null;
-
 
   // map[0][0] = 3;
   // map[1][0] = 3;
@@ -223,4 +226,47 @@ function drawSphere(i, j){
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position.set(i, 0, j);
   scene.add( sphere );
+}
+
+function createGhosts(){
+     var diff = 120;
+    for(var i = 0; i < 1; i++) {
+        material = new THREE.MeshPhongMaterial({ color: 0x2F7610 });
+        geometry = new THREE.CubeGeometry(4, 4, 4);
+        ghost = new THREE.Mesh(geometry, material)
+        ghost.position.x = (14.5*delta-diff)+(delta/2);
+        ghost.position.y = 0;
+        ghost.position.z = (14.5*delta-diff)+(delta/2);
+        ghost.castShadow = true;
+        ghost.receiveShadow = true;
+        ghosts.push(ghost);
+        scene.add(ghost);
+        //console.log(map[(ghost.position.x*delta-diff)+(delta/2)][(ghost.position.z*delta-diff)+(delta/2)]);
+        console.log((ghost.position.z-diff + (minX * -1))/delta);
+    }
+}
+
+function moveGhosts(){
+    for(ghost of ghosts){
+        // var x = (ghost.position.x-diff + (minX * -1))/delta;
+        // var y = (ghost.position.z-diff + (minY * -1))/delta;
+        var x = (ghost.position.x-(delta/2)+diff)/delta;
+        var y = (ghost.position.z-(delta/2)+diff)/delta;
+        x -= .5;
+        y -= .5;
+        // var x =  ghost.position.x = (14*delta-diff)+(delta/2);
+        // var y =  ghost.position.z = (14*delta-diff)+(delta/2);
+        if(map[parseInt(x)+1][y] == 0){
+            ghost.position.x = ((x+1.5)*delta-diff)+(delta/2);
+        }
+        if(map[x][parseInt(y)-1] == 0){
+            ghost.position.z = ((y-1.5)*delta-diff)+(delta/2);
+        }
+        if(map[parseInt(x)-1][y] == 0){
+            ghost.position.x = ((x-1.5)*delta-diff)+(delta/2);
+        }
+        if(map[x][parseInt(y)+1] == 0){
+            ghost.position.z = ((y+1.5)*delta-diff)+(delta/2);
+        }
+    }
 }
