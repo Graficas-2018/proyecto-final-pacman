@@ -1,3 +1,6 @@
+// delta de la matriz es 4 maso
+
+
 function run() {
     requestAnimationFrame(function() { run(); });
 
@@ -35,16 +38,13 @@ function createScene(canvas) {
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
     orbitControls.target = new THREE.Vector3(0,20,0);
 
+    drawpacman();
+
     // Create a group to hold all the objects
     root = new THREE.Object3D;
 
     ambientLight = new THREE.AmbientLight ( 0xffffff );
     root.add(ambientLight);
-
-    // var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-    // var material = new THREE.MeshBasicMaterial( {color: 0xf4f614} );
-    // var pacman1 = new THREE.Mesh( geometry, material );
-    // scene.add( pacman1 );
 
     // Create a group to hold the objects
     group = new THREE.Object3D;
@@ -108,20 +108,15 @@ function createBoard(){
   var row;
 
   for (var path in paths) {
-    // console.log(path);
     for (var coords in paths[path]) {
-      console.log(coords);
-      geometry = new THREE.BoxGeometry( size, size, size );
-      material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-      sphere = new THREE.Mesh( geometry, material );
-      sphere.position.set(paths[path][coords].x-diff, 0, paths[path][coords].y-diff);
-      group.add( sphere );
+      x = Math.round((paths[path][coords].x-diff + (minX * -1))/4);
+      y = Math.round((paths[path][coords].y-diff + (minY * -1))/4);
+      // console.log(String(paths[path][coords].x-diff) + ', ' + String(paths[path][coords].y-diff));
+      // console.log(String(x)+', '+String(y));
+      row = map[x];
+      row[y] = 1;
       if (paths[path][coords].cx != undefined) {
-        geometry = new THREE.BoxGeometry( size, size, size );
-        material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-        sphere = new THREE.Mesh( geometry, material );
-        sphere.position.set(paths[path][coords].cx-diff, 0, paths[path][coords].cy-diff);
-        group.add( sphere );
+        // map[paths[path][coords].cx-diff][paths[path][coords].cy-diff] = 1;
       }
     }
   }
@@ -158,6 +153,19 @@ function createBoard(){
 
 }
 
-function createPacman(){
+function drawpacman(){
+  var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+  var material = new THREE.MeshBasicMaterial( {color: 0xF4F614} );
+  var pacman1 = new THREE.Mesh( geometry, material );
+  scene.add( pacman1 );
+}
 
+function drawSquare(color, x, y){
+  var size = 8;
+
+  var geometry = new THREE.CubeGeometry( size, size, size );
+  var material = new THREE.MeshBasicMaterial( {color: color} );
+  var sphere = new THREE.Mesh( geometry, material );
+  sphere.position.set(x, 0, y);
+  group.add( sphere );
 }
