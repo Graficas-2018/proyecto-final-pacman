@@ -59,15 +59,15 @@ function createScene(canvas) {
 function createBoard(){
   var { paths } = mapgen();
 
-  console.log(paths);
+  // console.log(paths);
 
   var geometry;
   var material;
   var sphere;
   var diff = 120;
-  var size = 8;
   var color;
   var minX = null, maxX = null, minY = null, maxY = null;
+
 
   // map[0][0] = 3;
   // map[1][0] = 3;
@@ -75,7 +75,7 @@ function createBoard(){
   for (var path in paths) {
     color = Math.random() * 0xffffff;
     for (var coords in paths[path]) {
-      drawSquare(color, paths[path][coords].x-diff, paths[path][coords].y-diff)
+      // drawSquare(color, paths[path][coords].x-diff, paths[path][coords].y-diff)
       if (minX == null || paths[path][coords].x-diff < minX)
         minX = paths[path][coords].x-diff;
       if (minY == null || paths[path][coords].y-diff < minY)
@@ -85,7 +85,7 @@ function createBoard(){
       if (maxY == null || paths[path][coords].y-diff > maxY)
         maxY = paths[path][coords].y-diff;
       if (paths[path][coords].cx != undefined) {
-        drawSquare(color, paths[path][coords].cx-diff, paths[path][coords].cy-diff)
+        // drawSquare(color, paths[path][coords].cx-diff, paths[path][coords].cy-diff)
         if (minX == null || paths[path][coords].cx-diff < minX)
           minX = paths[path][coords].cx-diff;
         if (minY == null || paths[path][coords].cy-diff < minY)
@@ -98,58 +98,126 @@ function createBoard(){
     }
   }
 
-  map = Array(((maxX+(minX * -1))/4)+1).fill(0);
+  // console.log(minX);
+  // console.log(maxX);
+  // console.log(minY);
+  // console.log(maxY);
+
+  map = Array(((maxY+(minY * -1))/delta)+1).fill(0);
   for (var i = 0; i < map.length; i++) {
-    map[i] = Array(((maxY+(minY * -1))/4)+1).fill(0);
+    map[i] = Array(((maxX+(minX * -1))/delta)+1).fill(0);
   }
 
+  var arr = [];
 
-  var x, y;
-  var row;
 
   for (var path in paths) {
     for (var coords in paths[path]) {
-      x = Math.round((paths[path][coords].x-diff + (minX * -1))/4);
-      y = Math.round((paths[path][coords].y-diff + (minY * -1))/4);
-      // console.log(String(paths[path][coords].x-diff) + ', ' + String(paths[path][coords].y-diff));
-      // console.log(String(x)+', '+String(y));
-      row = map[x];
-      row[y] = 1;
+      arr.push({'x': ((paths[path][coords].x)*delta)-diff, 'y': ((paths[path][coords].y)*delta)-diff});
       if (paths[path][coords].cx != undefined) {
-        // map[paths[path][coords].cx-diff][paths[path][coords].cy-diff] = 1;
+        arr.push({'x': ((paths[path][coords].cx)*delta)-diff, 'y': ((paths[path][coords].cy)*delta)-diff});
       }
     }
   }
 
-  var diffX = 128;
-  var diffZ = 96;
-  size = 1;
-  for (var i = 0; i < map.length; i++) {
-    if(i == map.length-1) break;
-    if(i % 2 == 0) continue;
-    for (var j = 0; j < map[i].length; j++) {
-      if(j == map[i].length-1) break;
-      if(j % 2 == 0) continue;
-      if(map[i+1][j+1] == 1)
+
+  arr.sort(function(a, b) {
+    return a.y - b.y || a.x - b.x;
+  });
+
+  // console.log(arr);
+
+
+  var x, y;
+  var row;
+  var openTunnel = true;
+
+  for (var path in paths) {
+    for (var coords in paths[path]) {
+      x = Math.round((paths[path][coords].x-diff + (minX * -1))/delta);
+      y = Math.round((paths[path][coords].y-diff + (minY * -1))/delta);
+      if ((x == 0 || x == map[y].length -1) && openTunnel) {
+        openTunnel = false;
         continue;
+      } else if (x==0 || x == map[y].length -1) {
+        openTunnel = true;
+      }
+      row = map[y];
+      row[x] = 1;
+      if (paths[path][coords].cx != undefined) {
+        x = Math.round((paths[path][coords].cx-diff + (minX * -1))/delta);
+        y = Math.round((paths[path][coords].cy-diff + (minY * -1))/delta);
+        row = map[y];
+        row[x] = 1;
+      }
+    }
+  }
 
-      var geometry = new THREE.SphereGeometry( size, 10, 10 );
-      var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
-      var sphere = new THREE.Mesh( geometry, material );
-      sphere.position.set((i*4)-diffX, 0, (j*4)-diffZ);
-      scene.add( sphere );
+  var tunnelY = null;
 
+  var firstSphere = true;
+  color = Math.random() * 0xffffff;
+  var endRow = true;
 
+  for (var y in map) {
+    firstSphere = true;
+    // color = Math.random() * 0xffffff;
+    for (var x in map[y]) {
+      if(x == 0 && (y > 0 && y < map.length -2) && (map[parseInt(y)-1][x] == 1 && map[parseInt(y)+2][x] == 1)){
+        firstSphere = false;
+        tunnelY = y;
+      }
+
+      endRow = true;
+      for (var i = x; i < map[y].length; i++) {
+        if (map[y][i] == 1) {
+          endRow = false;
+          break;
+        }
+      }
+
+      if(y == tunnelY)
+        endRow = false;
+
+      if (
+        (y != 0 && y != map.length) &&
+        // (map[y-1][x] != 1 && map[y+1][x]) &&
+        (
+          // Do not draw in center
+          (x > 12 && x < 18 && y > 13 && y < 16) ||
+          // Do not draw in center and end Row
+          ( x == 15 && y == 13) || endRow
+        )
+      ) {
+        continue;
+      }
+      if (map[y][x] == 1) {
+        drawSquare(color, x*delta-diff, y*delta-diff);
+        firstSphere = false;
+      } else if(map[y][x] == 0) {
+        if (firstSphere || x > map[y].length - 4 || y > map.length - 1)
+          continue;
+        if(map[y][parseInt(x)+1] == 1 || map[parseInt(y)+1][x] == 1 || map[parseInt(y)+1][parseInt(x)+1] == 1 || (map[parseInt(y)+1][parseInt(x)+1] == 1 && map[parseInt(y)-1][parseInt(x)-1] == 1))
+          continue;
+        drawSphere((x*delta-diff)+(delta/2),(y*delta-diff)+(delta/2));
+      }
     }
   }
 
   console.log(map);
 
-  // console.log("min X: "+minX);
-  // console.log("max X: "+maxX);
-  // console.log("min Y: "+minY);
-  // console.log("max Y: "+maxY);
+  // for (var x in map) {
+  //   if (map[x][y] == 1) {
+  //     drawSquare(color, x*delta-diff, y*delta-diff);
+  //     firstSphere = false;
+  //   } else if(map[x][y] == 0) {
+  //     if (x == 0 || x == map.length-1 || y == 0 || y == map[x].length-1 || firstSphere)
+  //       continue;
+  //     drawSphere(x*delta-diff,y*delta-diff);
+  //   }
+  // }
 
+  // console.log(map);
 
 }
 
@@ -168,4 +236,12 @@ function drawSquare(color, x, y){
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position.set(x, 0, y);
   group.add( sphere );
+}
+
+function drawSphere(i, j){
+  var geometry = new THREE.SphereGeometry( 1, 10, 10 );
+  var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+  var sphere = new THREE.Mesh( geometry, material );
+  sphere.position.set(i, 0, j);
+  scene.add( sphere );
 }
