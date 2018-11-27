@@ -155,14 +155,18 @@ function createBoard(){
   var endRow = true;
 
   for (var y in map) {
+    // check to color the first sphere
     firstSphere = true;
     // color = Math.random() * 0xffffff;
+
+    // Check for first sphere and location in y of tunnel
     for (var x in map[y]) {
       if(x == 0 && (y > 0 && y < map.length -2) && (map[parseInt(y)-1][x] == 1 && map[parseInt(y)+2][x] == 1)){
         firstSphere = false;
         tunnelY = y;
       }
 
+      // check if theres more spheres or the row has ended
       endRow = true;
       for (var i = x; i < map[y].length; i++) {
         if (map[y][i] == 1) {
@@ -171,12 +175,12 @@ function createBoard(){
         }
       }
 
+      // Draw spheres in line of tunnel (ignore the end row)
       if(y == tunnelY)
         endRow = false;
 
       if (
         (y != 0 && y != map.length) &&
-        // (map[y-1][x] != 1 && map[y+1][x]) &&
         (
           // Do not draw in center
           (x > 12 && x < 18 && y > 13 && y < 16) ||
@@ -200,19 +204,6 @@ function createBoard(){
   }
 
   console.log(map);
-
-  // for (var x in map) {
-  //   if (map[x][y] == 1) {
-  //     drawSquare(color, x*delta-diff, y*delta-diff);
-  //     firstSphere = false;
-  //   } else if(map[x][y] == 0) {
-  //     if (x == 0 || x == map.length-1 || y == 0 || y == map[x].length-1 || firstSphere)
-  //       continue;
-  //     drawSphere(x*delta-diff,y*delta-diff);
-  //   }
-  // }
-
-  // console.log(map);
 
 }
 
