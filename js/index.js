@@ -1,5 +1,7 @@
 // delta de la matriz es 4 maso
-
+var geometry_pacman = new THREE.SphereGeometry( 5, 32, 32 );
+var material_pacman = new THREE.MeshBasicMaterial( {color: 0xF4F614} );
+var pacman1 = new THREE.Mesh( geometry_pacman, material_pacman );
 
 function run() {
     requestAnimationFrame(function() { run(); });
@@ -221,10 +223,36 @@ function createBoard(){
 
 }
 
+
+function onKeyDown(event)
+{
+    switch(event.keyCode)
+    {
+        case 40:
+            console.log("up");
+            pacman1.position.z += 5.09;
+            break;
+
+        case 38:
+            console.log("down");
+            pacman1.position.z -= 5.09;
+            break;
+
+        case 39:
+            console.log("right");
+            pacman1.position.x += 5.09;
+            break;
+
+        case 37:
+            console.log("left");
+            pacman1.position.x -= 5.09;
+            break;
+    }
+
+}
+
 function drawpacman(){
-  var geometry = new THREE.SphereGeometry( 5, 32, 32 );
-  var material = new THREE.MeshBasicMaterial( {color: 0xF4F614} );
-  var pacman1 = new THREE.Mesh( geometry, material );
+  pacman1.position.set(0, 0, 20);
   scene.add( pacman1 );
 }
 
