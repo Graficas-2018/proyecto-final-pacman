@@ -1,4 +1,8 @@
 var clock = new THREE.Clock();
+// delta de la matriz es 4 maso
+var geometry_pacman = new THREE.SphereGeometry( 5, 32, 32 );
+var material_pacman = new THREE.MeshBasicMaterial( {color: 0xF4F614} );
+var pacman1 = new THREE.Mesh( geometry_pacman, material_pacman );
 
 function run() {
     requestAnimationFrame(function() { run(); });
@@ -14,8 +18,36 @@ function run() {
           currentTime = now;
         }
 
+        switch (rotation) {
+          case 0:
+            camera.position.set(pacman1.position.x , pacman1.position.y + 30, pacman1.position.z + 60);
+            break;
+
+          case 1:
+            camera.position.set(pacman1.position.x + 60, pacman1.position.y + 30, pacman1.position.z );
+            break;
+
+          case 2:
+            camera.position.set(pacman1.position.x, pacman1.position.y + 30, pacman1.position.z - 60);
+            break;
+
+          case 3:
+            camera.position.set(pacman1.position.x  - 60, pacman1.position.y + 30, pacman1.position.z);
+            break;
+        }
+
+        camera.lookAt(pacman1.position);
+
+        if(pacman1.position.x < minX){
+          pacman1.position.x = maxX - delta;
+          camera.position.x = maxX - delta;
+        }else if(pacman1.position.x > maxX){
+          pacman1.position.x = maxX - delta;
+          camera.position.x = minX + delta;
+        }
+
         // Update the camera controller
-        orbitControls.update();
+        // orbitControls.update();
 }
 
 function createScene(canvas) {
@@ -36,11 +68,15 @@ function createScene(canvas) {
 
     // Add  a camera so we can view the scene
     camera = new THREE.PerspectiveCamera( 45, canvas.width / canvas.height, 1, 4000 );
-    camera.position.set(0, 600, 0);
+    camera.position.set(0, 30, pacman1.position.z + 60);
+    camera.rotation.x = -Math.PI/7;
+    // camera.position.set(0, 20, 80);
     scene.add(camera);
 
-    orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-    orbitControls.target = new THREE.Vector3(0,20,0);
+    // orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+    // orbitControls.target = new THREE.Vector3(0,20,0);
+
+    drawpacman();
 
     // Create a group to hold all the objects
     root = new THREE.Object3D;
@@ -213,6 +249,105 @@ function createBoard(){
 
 }
 
+
+function onKeyDown(event)
+{
+    switch(event.keyCode)
+    {
+
+      case 38:
+          console.log("foward");
+          if(rotation == 0){
+            pacman1.position.z -= delta ;
+            camera.position.z -= delta ;
+          }else if(rotation == 1){
+            pacman1.position.x -= delta;
+            camera.position.x -= delta;
+          }else if(rotation == 2){
+            pacman1.position.z += delta ;
+            camera.position.z += delta ;
+          }else if(rotation == 3){
+            pacman1.position.x += delta ;
+            camera.position.x += delta ;
+          }
+          break;
+
+        case 40:
+            console.log("back");
+            switch (rotation) {
+              case 0:
+                rotation = 2;
+                break;
+
+              case 1:
+                rotation = 3;
+                break;
+
+              case 2:
+                rotation = 0;
+                break;
+
+              case 3:
+                rotation = 1;
+                break;
+
+            }
+            break;
+
+
+
+        case 37:
+            console.log("left");
+            switch (rotation) {
+              case 0:
+                rotation = 1;
+                break;
+
+              case 1:
+                rotation = 2;
+                break;
+
+              case 2:
+                rotation = 3;
+                break;
+
+              case 3:
+                rotation = 0;
+                break;
+
+            }
+            break;
+
+        case 39:
+            console.log("right");
+            switch (rotation) {
+              case 0:
+                rotation = 3;
+                break;
+
+              case 1:
+                rotation = 0;
+                break;
+
+              case 2:
+                rotation = 1;
+                break;
+
+              case 3:
+                rotation = 2;
+                break;
+
+            }
+            break;
+    }
+
+}
+
+function drawpacman(){
+  pacman1.position.set(4, 0, 20);
+  scene.add( pacman1 );
+}
+
 function drawSquare(color, x, y){
   var size = 8;
 
@@ -221,6 +356,12 @@ function drawSquare(color, x, y){
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position.set(x, 0, y);
   group.add( sphere );
+
+  // var geometry = new THREE.BoxBufferGeometry( 100, 100, 100 );
+  var edges = new THREE.EdgesGeometry( geometry );
+  var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+  line.position.set(x, 0, y);
+  group.add( line );
 }
 
 function drawSphere(i, j){
@@ -255,7 +396,6 @@ function moveGhosts(){
   for(ghost of ghosts){
     var x = ((ghost.position.x+diff)/delta)-.5;
     var y = ((ghost.position.z+diff)/delta)-.5;
-    console.log(x, y);
     // if(y == map.length - 2 || x == map[y].length - 2)
     //   continue;
     if (ghost.rand == null) {
