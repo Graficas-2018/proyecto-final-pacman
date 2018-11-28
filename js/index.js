@@ -8,8 +8,11 @@ function run() {
 
         // Spin the cube for next frame
         // animate();
-
-        moveGhosts();
+        var now = Date.now();
+        if (now - currentTime >= 400) {
+          moveGhosts();
+          currentTime = now;
+        }
 
         // Update the camera controller
         orbitControls.update();
@@ -230,43 +233,117 @@ function drawSphere(i, j){
 
 function createGhosts(){
      var diff = 120;
-    for(var i = 0; i < 1; i++) {
-        material = new THREE.MeshPhongMaterial({ color: 0x2F7610 });
-        geometry = new THREE.CubeGeometry(4, 4, 4);
+    for(var i = 0; i < 4; i++) {
+        material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
+        geometry = new THREE.CubeGeometry(4, 6, 4);
         ghost = new THREE.Mesh(geometry, material)
-        ghost.position.x = (14.5*delta-diff)+(delta/2);
+        ghost.position.x = arr2Coord(13+i);
         ghost.position.y = 0;
-        ghost.position.z = (14.5*delta-diff)+(delta/2);
+        ghost.position.z = arr2Coord(14);
         ghost.castShadow = true;
         ghost.receiveShadow = true;
+        ghost.rand = null;
         ghosts.push(ghost);
         scene.add(ghost);
         //console.log(map[(ghost.position.x*delta-diff)+(delta/2)][(ghost.position.z*delta-diff)+(delta/2)]);
-        console.log((ghost.position.z-diff + (minX * -1))/delta);
+        // console.log((ghost.position.z-diff + (minX * -1))/delta);
     }
 }
 
 function moveGhosts(){
-    for(ghost of ghosts){
-        // var x = (ghost.position.x-diff + (minX * -1))/delta;
-        // var y = (ghost.position.z-diff + (minY * -1))/delta;
-        var x = (ghost.position.x-(delta/2)+diff)/delta;
-        var y = (ghost.position.z-(delta/2)+diff)/delta;
-        x -= .5;
-        y -= .5;
-        // var x =  ghost.position.x = (14*delta-diff)+(delta/2);
-        // var y =  ghost.position.z = (14*delta-diff)+(delta/2);
-        if(map[parseInt(x)+1][y] == 0){
-            ghost.position.x = ((x+1.5)*delta-diff)+(delta/2);
+  var rand = null;
+  for(ghost of ghosts){
+    var x = ((ghost.position.x+diff)/delta)-.5;
+    var y = ((ghost.position.z+diff)/delta)-.5;
+    console.log(x, y);
+    // if(y == map.length - 2 || x == map[y].length - 2)
+    //   continue;
+    if (ghost.rand == null) {
+      ghost.rand = random(1,4);
+    } else if(ghost.rand == 1){
+      rand = random(1,3);
+      if(rand == 1){
+        if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
+          ghost.position.x = arr2Coord(parseInt(x)+1);
+          ghost.rand = 3;
         }
-        if(map[x][parseInt(y)-1] == 0){
-            ghost.position.z = ((y-1.5)*delta-diff)+(delta/2);
+      } else if (rand == 2){
+        if(map[y][parseInt(x)-1] == 0){
+          ghost.position.x = arr2Coord(parseInt(x)-1);
+          ghost.rand = 4;
         }
-        if(map[parseInt(x)-1][y] == 0){
-            ghost.position.x = ((x-1.5)*delta-diff)+(delta/2);
+      } else if (rand == 3){
+        if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
+          ghost.position.z = arr2Coord(parseInt(y)+1);
+        } else {
+          ghost.rand = null;
         }
-        if(map[x][parseInt(y)+1] == 0){
-            ghost.position.z = ((y+1.5)*delta-diff)+(delta/2);
+      }
+    } else if(ghost.rand == 2){
+      rand = random(1,3);
+      if(rand == 1){
+        if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
+          ghost.position.x = arr2Coord(parseInt(x)+1);
+          ghost.rand = 3;
         }
+      } else if (rand == 2){
+        if(map[y][parseInt(x)-1] == 0){
+          ghost.position.x = arr2Coord(parseInt(x)-1);
+          ghost.rand = 4;
+        }
+      } else if (rand == 3){
+        if(map[parseInt(y)-1][x] == 0){
+          ghost.position.z = arr2Coord(parseInt(y)-1);
+        } else {
+          ghost.rand = null;
+        }
+      }
+    } else if(ghost.rand == 3){
+      rand = random(1,3);
+      if(rand == 1){
+        if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
+          ghost.position.z = arr2Coord(parseInt(y)+1);
+          ghost.rand = 1;
+        }
+      } else if (rand == 2){
+        if(map[parseInt(y)-1][x] == 0){
+          ghost.position.z = arr2Coord(parseInt(y)-1);
+          ghost.rand = 2;
+        }
+      } else if (rand == 3){
+        if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
+          ghost.position.x = arr2Coord(parseInt(x)+1);
+        } else {
+          ghost.rand = null;
+        }
+      }
+    } else if(ghost.rand == 4){
+      rand = random(1,3);
+      if(rand == 1){
+        if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
+          ghost.position.z = arr2Coord(parseInt(y)+1);
+          ghost.rand = 1;
+        }
+      } else if (rand == 2){
+        if(map[parseInt(y)-1][x] == 0){
+          ghost.position.z = arr2Coord(parseInt(y)-1);
+          ghost.rand = 2;
+        }
+      } else if (rand == 3){
+        if(map[y][parseInt(x)-1] == 0){
+          ghost.position.x = arr2Coord(parseInt(x)-1);
+        } else {
+          ghost.rand = null;
+        }
+      }
     }
+  }
+}
+
+function arr2Coord(n){
+  return ((n)*delta-diff)+(delta/2);
+}
+
+function random(min, max) {
+  return Math.floor(Math.random()*(max-min+1)+min);
 }
