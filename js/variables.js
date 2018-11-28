@@ -18,3 +18,5 @@ diff = 120;
 var rotation = 0;
 
 var currentTime = Date.now();
+
+var debug = true;

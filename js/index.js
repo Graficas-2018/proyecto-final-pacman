@@ -13,41 +13,48 @@ function run() {
         // Spin the cube for next frame
         // animate();
         var now = Date.now();
-        if (now - currentTime >= 400) {
+        if (now - currentTime >= 0) {
           moveGhosts();
           currentTime = now;
         }
 
-        switch (rotation) {
-          case 0:
-            camera.position.set(pacman1.position.x , pacman1.position.y + 30, pacman1.position.z + 60);
-            break;
+        if(!debug){
+          switch (rotation) {
+            case 0:
+              camera.position.set(pacman1.position.x , pacman1.position.y + 30, pacman1.position.z + 60);
+              break;
 
-          case 1:
-            camera.position.set(pacman1.position.x + 60, pacman1.position.y + 30, pacman1.position.z );
-            break;
+            case 1:
+              camera.position.set(pacman1.position.x + 60, pacman1.position.y + 30, pacman1.position.z );
+              break;
 
-          case 2:
-            camera.position.set(pacman1.position.x, pacman1.position.y + 30, pacman1.position.z - 60);
-            break;
+            case 2:
+              camera.position.set(pacman1.position.x, pacman1.position.y + 30, pacman1.position.z - 60);
+              break;
 
-          case 3:
-            camera.position.set(pacman1.position.x  - 60, pacman1.position.y + 30, pacman1.position.z);
-            break;
+            case 3:
+              camera.position.set(pacman1.position.x  - 60, pacman1.position.y + 30, pacman1.position.z);
+              break;
+          }
+
+          camera.lookAt(pacman1.position);
+
+          orbitControls.update();
+
         }
 
-        camera.lookAt(pacman1.position);
 
         if(pacman1.position.x < minX){
-          pacman1.position.x = maxX - delta;
-          camera.position.x = maxX - delta;
+          pacman1.position.x = maxX - (delta/2);
+          if(!debug)
+            camera.position.x = maxX - (delta/2);
         }else if(pacman1.position.x > maxX){
-          pacman1.position.x = maxX - delta;
-          camera.position.x = minX + delta;
+          pacman1.position.x = minX + (delta/2);
+          if(!debug)
+            camera.position.x = minX + (delta/2);
         }
 
         // Update the camera controller
-        // orbitControls.update();
 }
 
 function createScene(canvas) {
@@ -68,13 +75,20 @@ function createScene(canvas) {
 
     // Add  a camera so we can view the scene
     camera = new THREE.PerspectiveCamera( 45, canvas.width / canvas.height, 1, 4000 );
-    camera.position.set(0, 30, pacman1.position.z + 60);
-    camera.rotation.x = -Math.PI/7;
+    if (debug) {
+      camera.position.set(0, 600, 0);
+      orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
+      orbitControls.target = new THREE.Vector3(0,20,0);
+    } else {
+      camera.position.set(0, 30, pacman1.position.z + 60);
+      camera.rotation.x = -Math.PI/7;
+    }
+
     // camera.position.set(0, 20, 80);
     scene.add(camera);
 
-    // orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
-    // orbitControls.target = new THREE.Vector3(0,20,0);
+
+
 
     drawpacman();
 
@@ -249,12 +263,31 @@ function createBoard(){
 
 }
 
+function onKeyDown(event){
+  if(debug)
+    switch(event.keyCode){
+    case 38:
+        console.log("foward");
+        pacman1.position.z -= delta ;
+        break;
 
-function onKeyDown(event)
-{
-    switch(event.keyCode)
-    {
+      case 40:
+          console.log("back");
+          pacman1.position.z += delta ;
+          break;
 
+      case 37:
+          console.log("left");
+          pacman1.position.x -= delta ;
+          break;
+
+      case 39:
+          console.log("right");
+          pacman1.position.x += delta ;
+          break;
+  }
+  else
+    switch(event.keyCode){
       case 38:
           console.log("foward");
           if(rotation == 0){
@@ -340,7 +373,6 @@ function onKeyDown(event)
             }
             break;
     }
-
 }
 
 function drawpacman(){
@@ -408,12 +440,16 @@ function moveGhosts(){
           ghost.rand = 3;
         }
       } else if (rand == 2){
-        if(map[y][parseInt(x)-1] == 0){
+        if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
           ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.rand = 4;
         }
       } else if (rand == 3){
         if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
+          if(map[parseInt(y)+1][parseInt(x)+1] != 0)
+            ghost.position.x = arr2Coord(parseInt(x)-1);
+          // if(map[parseInt(y)+1][x-1] != 0)
+            // ghost.position.x += arr2Coord(parseInt(x)+1);
           ghost.position.z = arr2Coord(parseInt(y)+1);
         } else {
           ghost.rand = null;
@@ -427,12 +463,14 @@ function moveGhosts(){
           ghost.rand = 3;
         }
       } else if (rand == 2){
-        if(map[y][parseInt(x)-1] == 0){
+        if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
           ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.rand = 4;
         }
       } else if (rand == 3){
-        if(map[parseInt(y)-1][x] == 0){
+        if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
+          if(map[parseInt(y)-1][parseInt(x)+1] != 0)
+            ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.position.z = arr2Coord(parseInt(y)-1);
         } else {
           ghost.rand = null;
@@ -446,12 +484,14 @@ function moveGhosts(){
           ghost.rand = 1;
         }
       } else if (rand == 2){
-        if(map[parseInt(y)-1][x] == 0){
+        if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
           ghost.position.z = arr2Coord(parseInt(y)-1);
           ghost.rand = 2;
         }
       } else if (rand == 3){
         if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
+          if(map[parseInt(y)+1][parseInt(x)+1] != 0)
+            ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.position.x = arr2Coord(parseInt(x)+1);
         } else {
           ghost.rand = null;
@@ -465,12 +505,14 @@ function moveGhosts(){
           ghost.rand = 1;
         }
       } else if (rand == 2){
-        if(map[parseInt(y)-1][x] == 0){
+        if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
           ghost.position.z = arr2Coord(parseInt(y)-1);
           ghost.rand = 2;
         }
       } else if (rand == 3){
-        if(map[y][parseInt(x)-1] == 0){
+        if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
+          // if(map[parseInt(y)+1][parseInt(x)-1] != 0)
+            // ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.position.x = arr2Coord(parseInt(x)-1);
         } else {
           ghost.rand = null;
