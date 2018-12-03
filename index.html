@@ -16,11 +16,34 @@
     <script src="./libs/pacman-mazegen-gh-pages/tetris/mapgen.js"></script>
     <script src="./libs/pacman-mazegen-gh-pages/tetris/Map.js"></script>
 
+    <script src="./libs/tween.js/tween.js"></script>
+    <script src="./libs/keyframe.js/keyframe.js"></script>
+
     <script src="./js/index.js"></script>
     <script src="./js/variables.js"></script>
+    <script src="./js/animations.js"></script>
   </head>
   <body>
+    <!-- <canvas id="canvas"></canvas> -->
+
+    <div id="container">
     <canvas id="canvas"></canvas>
+    	<div id="title">
+    		Pacman 3D
+    	</div>
+    	<div id="animations" style="color: white;">
+    		Score: 0
+    	</div>
+      <img id="vida" src="./images/heart.png" alt="">
+      <img id="vida2" src="./images/heart.png" alt="">
+      <img id="vida3" src="./images/heart.png" alt="">
+    </div>
+
+    <div id="properties">
+      <div id="directional" class="colorSelector"></div>
+      <div id="spot" class="colorSelector"></div>
+      <div id="ambient" class="colorSelector"></div>
+    </div>
 
   <script type="text/javascript">
     var canvas = document.getElementById("canvas");

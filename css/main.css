@@ -1,1 +1,72 @@
 @charset "UTF-8";
+
+* {
+    font-family: Arial;
+    font-size:20px;
+    font-style: italic;
+}
+
+body {
+	color:rgb(255, 255, 255);
+}
+
+#container {
+	position:absolute;
+}
+
+#canvas {
+	border:none;
+	background-color:#ffffff;
+}
+
+#title {
+	position:absolute;
+	left:20px;
+	top:20px;
+}
+
+#prompt {
+	position:absolute;
+	bottom:20px;
+	left:20px;
+}
+
+#animations {
+	color:MidnightBlue;
+	position:absolute;
+	left:710px;
+	top:20px;
+	font-size:20px;
+	margin-top:10px;
+	margin-left:10px;
+}
+
+img#vida {
+	position: absolute;
+	left:810px;
+	top:10px;
+	font-size:20px;
+	margin-top:10px;
+	margin-left:10px;
+  width: 50px;
+}
+
+img#vida2 {
+	position: absolute;
+	left:870px;
+	top:10px;
+	font-size:20px;
+	margin-top:10px;
+	margin-left:10px;
+  width: 50px;
+}
+
+img#vida3 {
+	position: absolute;
+	left:930px;
+	top:10px;
+	font-size:20px;
+	margin-top:10px;
+	margin-left:10px;
+  width: 50px;
+}

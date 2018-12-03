@@ -7,7 +7,11 @@ delta = 8,
 material = null,
 geometry = null,
 ghost = null,
-ghosts = [];
+ghosts = [],
+spheres = [],
+walls = [],
+pacmanBBox = null,
+ghostsBBox = [];
 
 var minX = null,
 minY = null,
@@ -19,4 +23,7 @@ var rotation = 0;
 
 var currentTime = Date.now();
 
-var debug = true;
+var debug = false;
+
+var score = 0,
+lives = 4;

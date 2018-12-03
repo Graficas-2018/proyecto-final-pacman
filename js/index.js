@@ -13,34 +13,38 @@ function run() {
         // Spin the cube for next frame
         // animate();
         var now = Date.now();
-        if (now - currentTime >= 0) {
+        if (now - currentTime >= 30000) {
           moveGhosts();
           currentTime = now;
         }
 
+        pacmanBBox.setFromObject(pacman1);
+
+
         if(!debug){
-          switch (rotation) {
-            case 0:
-              camera.position.set(pacman1.position.x , pacman1.position.y + 30, pacman1.position.z + 60);
-              break;
-
-            case 1:
-              camera.position.set(pacman1.position.x + 60, pacman1.position.y + 30, pacman1.position.z );
-              break;
-
-            case 2:
-              camera.position.set(pacman1.position.x, pacman1.position.y + 30, pacman1.position.z - 60);
-              break;
-
-            case 3:
-              camera.position.set(pacman1.position.x  - 60, pacman1.position.y + 30, pacman1.position.z);
-              break;
-          }
+          // switch (rotation) {
+          //   case 0:
+          //     camera.position.set(pacman1.position.x , pacman1.position.y + 30, pacman1.position.z + 60);
+          //     break;
+          //
+          //   case 1:
+          //     camera.position.set(pacman1.position.x + 60, pacman1.position.y + 30, pacman1.position.z );
+          //     break;
+          //
+          //   case 2:
+          //     camera.position.set(pacman1.position.x, pacman1.position.y + 30, pacman1.position.z - 60);
+          //     break;
+          //
+          //   case 3:
+          //     camera.position.set(pacman1.position.x  - 60, pacman1.position.y + 30, pacman1.position.z);
+          //     break;
+          // }
 
           camera.lookAt(pacman1.position);
 
-          orbitControls.update();
 
+        } else {
+          orbitControls.update();
         }
 
 
@@ -52,6 +56,35 @@ function run() {
           pacman1.position.x = minX + (delta/2);
           if(!debug)
             camera.position.x = minX + (delta/2);
+        }
+
+        KF.update();
+        if(
+          !pacman1.zFowardAnimation.running
+          && !pacman1.zBackAnimation.running
+          && !pacman1.xLeftAnimation.running
+          && !pacman1.xRightAnimation.running
+        ){
+          pacmanAnimations();
+          cameraAnimations();
+        }
+
+
+        for (var element in ghostsBBox) {
+          ghostsBBox[element].setFromObject(ghosts[element]);
+          if(ghostsBBox[element].containsPoint(pacman1.position)){
+            resetPlayer();
+          }
+        }
+
+        for (var element in spheres) {
+          if(pacmanBBox.containsPoint(spheres[element].position)){
+            if(spheres[element].visible == true){
+              score++;
+              $('#animations').text('Score: '+score);
+            }
+            spheres[element].visible = false;
+          }
         }
 
         // Update the camera controller
@@ -80,16 +113,11 @@ function createScene(canvas) {
       orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
       orbitControls.target = new THREE.Vector3(0,20,0);
     } else {
-      camera.position.set(0, 30, pacman1.position.z + 60);
+      camera.position.set(4, 30, 80);
       camera.rotation.x = -Math.PI/7;
     }
 
-    // camera.position.set(0, 20, 80);
     scene.add(camera);
-
-
-
-
     drawpacman();
 
     // Create a group to hold all the objects
@@ -105,8 +133,12 @@ function createScene(canvas) {
     // Now add the group to our scene
     scene.add( root );
 
+    pacmanBBox = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+
     createBoard();
     createGhosts();
+    pacmanAnimations();
+    cameraAnimations();
 }
 
 function createBoard(){
@@ -217,6 +249,8 @@ function createBoard(){
 
     // Check for first sphere and location in y of tunnel
     for (var x in map[y]) {
+      // color = Math.random() * 0xffffff;
+
       if(x == 0 && (y > 0 && y < map.length -2) && (map[parseInt(y)-1][x] == 1 && map[parseInt(y)+2][x] == 1)){
         firstSphere = false;
         tunnelY = y;
@@ -263,117 +297,7 @@ function createBoard(){
 
 }
 
-function onKeyDown(event){
-  if(debug)
-    switch(event.keyCode){
-    case 38:
-        console.log("foward");
-        pacman1.position.z -= delta ;
-        break;
 
-      case 40:
-          console.log("back");
-          pacman1.position.z += delta ;
-          break;
-
-      case 37:
-          console.log("left");
-          pacman1.position.x -= delta ;
-          break;
-
-      case 39:
-          console.log("right");
-          pacman1.position.x += delta ;
-          break;
-  }
-  else
-    switch(event.keyCode){
-      case 38:
-          console.log("foward");
-          if(rotation == 0){
-            pacman1.position.z -= delta ;
-            camera.position.z -= delta ;
-          }else if(rotation == 1){
-            pacman1.position.x -= delta;
-            camera.position.x -= delta;
-          }else if(rotation == 2){
-            pacman1.position.z += delta ;
-            camera.position.z += delta ;
-          }else if(rotation == 3){
-            pacman1.position.x += delta ;
-            camera.position.x += delta ;
-          }
-          break;
-
-        case 40:
-            console.log("back");
-            switch (rotation) {
-              case 0:
-                rotation = 2;
-                break;
-
-              case 1:
-                rotation = 3;
-                break;
-
-              case 2:
-                rotation = 0;
-                break;
-
-              case 3:
-                rotation = 1;
-                break;
-
-            }
-            break;
-
-
-
-        case 37:
-            console.log("left");
-            switch (rotation) {
-              case 0:
-                rotation = 1;
-                break;
-
-              case 1:
-                rotation = 2;
-                break;
-
-              case 2:
-                rotation = 3;
-                break;
-
-              case 3:
-                rotation = 0;
-                break;
-
-            }
-            break;
-
-        case 39:
-            console.log("right");
-            switch (rotation) {
-              case 0:
-                rotation = 3;
-                break;
-
-              case 1:
-                rotation = 0;
-                break;
-
-              case 2:
-                rotation = 1;
-                break;
-
-              case 3:
-                rotation = 2;
-                break;
-
-            }
-            break;
-    }
-}
 
 function drawpacman(){
   pacman1.position.set(4, 0, 20);
@@ -388,6 +312,7 @@ function drawSquare(color, x, y){
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position.set(x, 0, y);
   group.add( sphere );
+  walls.push(sphere);
 
   // var geometry = new THREE.BoxBufferGeometry( 100, 100, 100 );
   var edges = new THREE.EdgesGeometry( geometry );
@@ -401,6 +326,7 @@ function drawSphere(i, j){
   var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position.set(i, 0, j);
+  spheres.push( sphere );
   scene.add( sphere );
 }
 
@@ -408,16 +334,17 @@ function createGhosts(){
      var diff = 120;
     for(var i = 0; i < 4; i++) {
         material = new THREE.MeshPhongMaterial({ color: Math.random() * 0xffffff });
-        geometry = new THREE.CubeGeometry(4, 6, 4);
+        geometry = new THREE.CubeGeometry(4, 6, 6);
         ghost = new THREE.Mesh(geometry, material)
         ghost.position.x = arr2Coord(13+i);
         ghost.position.y = 0;
-        ghost.position.z = arr2Coord(14);
+        ghost.position.z = arr2Coord(11);
         ghost.castShadow = true;
         ghost.receiveShadow = true;
         ghost.rand = null;
         ghosts.push(ghost);
         scene.add(ghost);
+        ghostsBBox.push(new THREE.Box3(new THREE.Vector3(), new THREE.Vector3()));
         //console.log(map[(ghost.position.x*delta-diff)+(delta/2)][(ghost.position.z*delta-diff)+(delta/2)]);
         // console.log((ghost.position.z-diff + (minX * -1))/delta);
     }
@@ -434,82 +361,82 @@ function moveGhosts(){
       ghost.rand = random(1,4);
     } else if(ghost.rand == 1){
       rand = random(1,3);
-      if(rand == 1){
-        if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
-          ghost.position.x = arr2Coord(parseInt(x)+1);
-          ghost.rand = 3;
-        }
-      } else if (rand == 2){
-        if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
-          ghost.position.x = arr2Coord(parseInt(x)-1);
-          ghost.rand = 4;
-        }
-      } else if (rand == 3){
+      // if(rand == 1){
+      //   if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
+      //     ghost.position.x = arr2Coord(parseInt(x)+1);
+      //     ghost.rand = 3;
+      //   }
+      // } else if (rand == 2){
+      //   if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
+      //     ghost.position.x = arr2Coord(parseInt(x)-1);
+      //     ghost.rand = 4;
+      //   }
+      // } else if (rand == 3){
         if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
-          if(map[parseInt(y)+1][parseInt(x)+1] != 0)
-            ghost.position.x = arr2Coord(parseInt(x)-1);
+          // if(map[parseInt(y)+1][parseInt(x)+1] != 0)
+            // ghost.position.x = arr2Coord(parseInt(x)-1);
           // if(map[parseInt(y)+1][x-1] != 0)
             // ghost.position.x += arr2Coord(parseInt(x)+1);
           ghost.position.z = arr2Coord(parseInt(y)+1);
         } else {
           ghost.rand = null;
         }
-      }
+      // }
     } else if(ghost.rand == 2){
       rand = random(1,3);
-      if(rand == 1){
-        if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
-          ghost.position.x = arr2Coord(parseInt(x)+1);
-          ghost.rand = 3;
-        }
-      } else if (rand == 2){
-        if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
-          ghost.position.x = arr2Coord(parseInt(x)-1);
-          ghost.rand = 4;
-        }
-      } else if (rand == 3){
+      // if(rand == 1){
+      //   if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
+      //     ghost.position.x = arr2Coord(parseInt(x)+1);
+      //     ghost.rand = 3;
+      //   }
+      // } else if (rand == 2){
+      //   if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
+      //     ghost.position.x = arr2Coord(parseInt(x)-1);
+      //     ghost.rand = 4;
+      //   }
+      // } else if (rand == 3){
         if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
-          if(map[parseInt(y)-1][parseInt(x)+1] != 0)
-            ghost.position.x = arr2Coord(parseInt(x)-1);
+          // if(map[parseInt(y)-1][parseInt(x)+1] != 0)
+            // ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.position.z = arr2Coord(parseInt(y)-1);
         } else {
           ghost.rand = null;
         }
-      }
+      // }
     } else if(ghost.rand == 3){
       rand = random(1,3);
-      if(rand == 1){
-        if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
-          ghost.position.z = arr2Coord(parseInt(y)+1);
-          ghost.rand = 1;
-        }
-      } else if (rand == 2){
-        if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
-          ghost.position.z = arr2Coord(parseInt(y)-1);
-          ghost.rand = 2;
-        }
-      } else if (rand == 3){
+      // if(rand == 1){
+      //   if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
+      //     ghost.position.z = arr2Coord(parseInt(y)+1);
+      //     ghost.rand = 1;
+      //   }
+      // } else if (rand == 2){
+      //   if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
+      //     ghost.position.z = arr2Coord(parseInt(y)-1);
+      //     ghost.rand = 2;
+      //   }
+      // } else if (rand == 3){
         if(map[y][parseInt(x)+1] == 0 && map[y][parseInt(x)+2] == 0){
-          if(map[parseInt(y)+1][parseInt(x)+1] != 0)
-            ghost.position.x = arr2Coord(parseInt(x)-1);
+          // if(map[parseInt(y)+1][parseInt(x)+1] != 0)
+            // ghost.position.x = arr2Coord(parseInt(x)-1);
           ghost.position.x = arr2Coord(parseInt(x)+1);
         } else {
           ghost.rand = null;
         }
-      }
+      // }
     } else if(ghost.rand == 4){
       rand = random(1,3);
-      if(rand == 1){
-        if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
-          ghost.position.z = arr2Coord(parseInt(y)+1);
-          ghost.rand = 1;
-        }
-      } else if (rand == 2){
-        if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
-          ghost.position.z = arr2Coord(parseInt(y)-1);
-          ghost.rand = 2;
-        }
-      } else if (rand == 3){
+      // if(rand == 1){
+      //   if(map[parseInt(y)+1][x] == 0 && map[parseInt(y)+2][x] == 0){
+      //     ghost.position.z = arr2Coord(parseInt(y)+1);
+      //     ghost.rand = 1;
+      //   }
+      // } else if (rand == 2){
+      //   if(map[parseInt(y)-1][x] == 0 && map[parseInt(y)-2][x] == 0){
+      //     ghost.position.z = arr2Coord(parseInt(y)-1);
+      //     ghost.rand = 2;
+      //   }
+      // } else if (rand == 3){
         if(map[y][parseInt(x)-1] == 0 && map[y][parseInt(x)-2] == 0){
           // if(map[parseInt(y)+1][parseInt(x)-1] != 0)
             // ghost.position.x = arr2Coord(parseInt(x)-1);
@@ -517,7 +444,7 @@ function moveGhosts(){
         } else {
           ghost.rand = null;
         }
-      }
+      // }
     }
   }
 }
@@ -528,4 +455,34 @@ function arr2Coord(n){
 
 function random(min, max) {
   return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+function resetPlayer(){
+  lives--;
+  if(lives == 3)
+    $('#vida3').hide();
+  else if(lives == 2)
+    $('#vida2').hide();
+  else if(lives == 1)
+    $('#vida').hide();
+
+  pacman1.position.set(4, 0, 20);
+  if (!debug) {
+    camera.position.set(4, 30, 80);
+    camera.rotation.x = -Math.PI/7;
+  }
+
+  rotation = 0;
+
+  if(lives == 0){
+    lives = 3;
+    for (var element in spheres) {
+      score = 0;
+      $('#animations').text('Score: '+score);
+      spheres[element].visible = true;
+    }
+    $('#vida3').show();
+    $('#vida2').show();
+    $('#vida').show();
+  }
 }
